@@ -294,24 +294,34 @@ jobs:
     docker:
       - image: cimg/base:2022.09
     steps:
-      # Checkout code from git
       - run:
           name: Install dependencies
           command: |
-            # your code here
-            exit 1
-      - run:
-          name: Get backend url
-          command: |
-            # your code here
+            apk add --update curl openssh
       - run:
           name: Backend smoke test.
           command: |
-            # your code here
+            # Fetch and prepare the BACKEND_IP env var
+            export API_URL="export API_URL=$(curl https://kvdb.io/A47ubUVav1gPEE3oksfSYY/BACKEND_URL)"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |
-            # your code here
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            echo ${URL} 
+            if curl -s ${URL} | grep "Welcome"
+            then
+                # Change this to 0 after the job fails
+              return 1
+            else
+              return 1
+            fi
       - destroy-environment
       - revert-migrations
 
