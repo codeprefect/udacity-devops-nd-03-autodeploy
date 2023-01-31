@@ -21,7 +21,7 @@ export class EmployeeEffectiveDateUpdater extends BaseCommandHandler<UpdateEmplo
 
     employee.effectiveDate = moment(effectiveDate)
     .utc()
-    .format();
+    .toDate();
 
     await this.employeeRepository.save(employee);
   }
