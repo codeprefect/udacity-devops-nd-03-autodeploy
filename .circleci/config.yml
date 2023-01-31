@@ -14,21 +14,32 @@ executors:
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      workflow_id:
+        type: string
     steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            echo "Destroying environment: << parameters.workflow_id >> "
       - run:
           name: Destroy udapeople backend cfn stack
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
       - run:
           name: Destroy udapeople frontend cfn stack and S3 bucket
           when: on_fail
           command: |
-            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+            aws s3 rm s3://udapeople-<< parameters.workflow_id >> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      workflow_id:
+        type: string 
     steps:
       - run:
           name: Revert migrations
@@ -36,12 +47,12 @@ commands:
           working_directory: ./backend
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl -H --request GET https://kvdb.io/A47ubUVav1gPEE3oksfSYY/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            SUCCESS=$(curl -H --request GET https://kvdb.io/A47ubUVav1gPEE3oksfSYY/migration_<< parameters.workflow_id >>)
             echo $SUCCESS
             if [[ "$SUCCESS" == "1" ]]
             then
               pwd
-              ls -la
+              npm install
               npm run migrations:revert
             fi
             
@@ -190,7 +201,8 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   configure-infrastructure:
     executor:
@@ -213,7 +225,8 @@ jobs:
             ls -la
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
-      - destroy-environment
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   run-migrations:
     executor:
@@ -234,8 +247,10 @@ jobs:
             then
               curl https://kvdb.io/A47ubUVav1gPEE3oksfSYY/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     executor:
@@ -264,8 +279,10 @@ jobs:
           root: ~/
           paths:
             - project/frontend/dist
-      - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
                     
   deploy-backend:
     executor:
@@ -287,28 +304,30 @@ jobs:
           working_directory: ./.circleci/ansible
           command: |
             ansible-playbook -i inventory.txt deploy-backend.yml -vv
-      - destroy-environment
-      - revert-migrations 
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
-    docker:
-      - image: cimg/base:2022.09
+    executor:
+      name: aws
     steps:
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl openssh
+            yum update -y   && yum install -y curl openssh
       - run:
           name: Backend smoke test.
           command: |
             # Fetch and prepare the BACKEND_IP env var
-            export API_URL="export API_URL=$(curl https://kvdb.io/A47ubUVav1gPEE3oksfSYY/BACKEND_URL)"
-            echo "${API_URL}"
+            export API_URL=$(curl https://kvdb.io/A47ubUVav1gPEE3oksfSYY/BACKEND_URL)
+            echo $API_URL
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+                exit 0
             else
-                return 1
+                exit 1
             fi
       - run:
           name: Frontend smoke test.
@@ -317,13 +336,14 @@ jobs:
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
-                # Change this to 0 after the job fails
-              return 1
+              exit 1
             else
-              return 1
+              exit 1
             fi
-      - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   cloudfront-update:
     executor:
@@ -333,13 +353,20 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            yum update -y && yum install -y curl openssh nodejs npm
       - run:
           name: Update cloudfront distribution
           command: |
-            # your code here
-      - destroy-environment
-      - revert-migrations  
+            # Change the initial stack name, as applicable to you
+            aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
+              --stack-name InitialStack \
+              --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   cleanup:
       executor:

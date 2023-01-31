@@ -4,17 +4,17 @@
 
   - name: "copy src"
     become: true
-    synchronize:
-      src: ../../backend/
+    ansible.posix.synchronize:
+      src: ../../backend
       dest: /home/ubuntu/udapeople
       recursive: true
+      archive: no
 
   - name: "build backend"
     shell: |
-      cd /home/ubuntu/udapeople
-      ls -la
+      cd /home/ubuntu/udapeople/backend
       npm install
-      npm build
+      npm run build
 
   - name: "delete anything that might already be running"
     become: true
@@ -25,7 +25,7 @@
     become: true
     command: pm2 start -f ./main.js
     args:
-      chdir: /home/ubuntu/udapeople/dist
+      chdir: /home/ubuntu/udapeople/backend/dist
     environment:
      ENVIRONMENT: production
      TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION') }}"
