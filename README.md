@@ -19,7 +19,9 @@ Please find the details of my submission for project 3.
 
 #### Figure 2 (Failed unit tests)
 
-![Failed Test](./docs/screenshots/SCREENSHOT02.png)
+![Failed Frontend Test](./docs/screenshots/SCREENSHOT02-1.png)
+
+![Failed Backend Test](./docs/screenshots/SCREENSHOT02-2.png)
 
 #### Figure 3 (Found vulnerabilities)
 
