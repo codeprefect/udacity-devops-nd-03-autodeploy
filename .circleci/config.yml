@@ -1,41 +1,52 @@
 version: 2.1
 
-commands:
-  destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
-      # Add parameter here   
-    steps:
-      - run:
-          name: Destroy environments
-          when: on_fail
-          command: |
-            # Your code here
-            exit 1
+executors:
+  node:
+    docker:
+      - image: circleci/node:13.8.0
+  ansible:
+    docker:
+      - image: cytopia/ansible:2.9-manifest-linux-amd64
+  aws:
+    docker:
+      - image: amazon/aws-cli
 
-  revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      # Add parameter here     
-    steps:
-      - run:
-          name: Revert migrations
-          # Add when this will run
-          command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
-            then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
-            fi
+# commands:
+  # destroy-environment:
+  #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+  #   parameters:
+  #     # Add parameter here   
+  #   steps:
+  #     - run:
+  #         name: Destroy environments
+  #         when: on_fail
+  #         command: |
+  #           # Your code here
+  #           exit 1
+
+  # revert-migrations:
+  #   description: Revert the last migration if successfully run in the current workflow.
+  #   parameters:
+  #     # Add parameter here     
+  #   steps:
+  #     - run:
+  #         name: Revert migrations
+  #         # Add when this will run
+  #         command: |
+  #           # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+  #           SUCCESS = 1
+  #           if(( $SUCCESS==1 )); 
+  #           then
+  #           #  cd ~/project/backend
+  #           #  npm install
+  #           #  Add revert code here. You can find this in the Getting Started section.
+  #             exit 1
+  #           fi
             
 jobs:
   build-frontend:
-    docker:
-      - image: circleci/node:13.8.0
+    executor:
+      name: node
     steps:
       - checkout
       - restore_cache:
@@ -50,8 +61,8 @@ jobs:
           key: frontend-build
 
   build-backend:
-    docker:
-      - image: circleci/node:13.8.0
+    executor:
+      name: node
     steps:
       - checkout
       - restore_cache:
@@ -66,48 +77,68 @@ jobs:
           key: backend-build
 
   test-frontend:
-    docker:
-      # Docker image here
+    executor:
+      name: node
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Front-end build
+          command: |
+             # Your code here
+             exit 1
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-build
                 
   test-backend:
-    docker:
-      # Docker image here
+    executor:
+      name: node
     steps:
-      # Checkout code from git
-      # Restore from cache
-      # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: Back-end build
+          command: |
+             # Your code here
+             exit 1
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
             
   scan-frontend:
-    docker:
-      # Docker image here
+    executor:
+      name: node
     steps:
-      # Checkout code from git
-      # Restore from cache
+      - checkout
+      - restore_cache:
+          keys:
+            - frontend-build
       # Your job code here
 
   scan-backend:
-    docker:
-      # Docker image here
+    executor:
+      name: node
     steps:
-      # Checkout code from git
-      # Restore from cache
+      - checkout
+      - restore_cache:
+          keys:
+            - backend-build
       # Your job code here
 
   deploy-infrastructure:
-    docker:
-      # Docker image here that supports AWS CLI
+    executor:
+      name: aws
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              #--tags project=your-tag \
+              # --tags project=your-tag \
               # --stack-name "your back-end stack name with workflow id" \
               # --parameter-overrides ID="your workflow id"  
               exit 1
@@ -132,10 +163,10 @@ jobs:
       # Here's where you will add some code to rollback on failure      
 
   configure-infrastructure:
-    docker:
-      # Docker image here that supports Ansible
+    executor:
+      name: ansible
     steps:
-      # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
       # attach workspace
       - run:
@@ -151,10 +182,10 @@ jobs:
       # Here's where you will add some code to rollback on failure      
 
   run-migrations:
-    docker:
-      # Docker image here that supports NodeJS
+    executor:
+      name: node
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Run migrations
           command: |
@@ -168,10 +199,10 @@ jobs:
      # Here's where you will add some code to rollback on failure      
 
   deploy-frontend:
-    docker:
-      # Docker image here that supports AWS CLI
+    executor:
+      name: aws
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -189,10 +220,10 @@ jobs:
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
-    docker:
-      # Docker image here that supports Ansible
+    executor:
+      name: ansible
     steps:
-      # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
       # attach workspace
       - run:
@@ -207,7 +238,7 @@ jobs:
 
   smoke-test:
     docker:
-      # Lightweight Docker image 
+      - image: cimg/base:2022.09
     steps:
       # Checkout code from git
       - run:
@@ -229,8 +260,8 @@ jobs:
       # Here's where you will add some code to rollback on failure  
 
   cloudfront-update:
-    docker:
-      # Docker image here that supports AWS CLI
+    executor:
+      name: aws
     steps:
       # Checkout code from git
       - run:
@@ -244,10 +275,10 @@ jobs:
       # Here's where you will add some code to rollback on failure  
 
 cleanup:
-    docker:
-      # Docker image here
+    executor:
+      name: aws
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Get old stack workflow id
           command: |
