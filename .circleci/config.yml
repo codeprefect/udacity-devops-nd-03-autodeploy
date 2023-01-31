@@ -36,9 +36,9 @@ commands:
           working_directory: ./backend
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl -H --request GET https://api.memstash.io/values/DB_MIGRATION_${CIRCLE_WORKFLOW_ID:0:7})
+            SUCCESS=$(curl -H --request GET https://kvdb.io/A47ubUVav1gPEE3oksfSYY/migration_${CIRCLE_WORKFLOW_ID:0:7})
             echo $SUCCESS
-            if [[ "$SUCCESS" == "success" ]]
+            if [[ "$SUCCESS" == "1" ]]
             then
               pwd
               ls -la
@@ -156,7 +156,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=udacity-project-3 \
+              --tags project="udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
@@ -164,7 +164,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
-              --tags project=your-tag \
+              --tags project="udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
