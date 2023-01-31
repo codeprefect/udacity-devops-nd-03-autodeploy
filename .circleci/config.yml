@@ -281,13 +281,11 @@ jobs:
           name: Install dependencies
           working_directory: /tmp
           command: |
-            apk add --update curl rsync openssh nodejs npm
+            apk add --update curl rsync
       - run:
           name: Deploy backend
           working_directory: ./.circleci/ansible
           command: |
-            npm install
-            cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml -vv
       - destroy-environment
       - revert-migrations 
