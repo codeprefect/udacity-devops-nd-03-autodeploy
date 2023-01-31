@@ -120,7 +120,12 @@ jobs:
       - restore_cache:
           keys:
             - frontend-build
-      # Your job code here
+      - run:
+          name: Check vulnerability
+          command: |
+            cd frontend
+            npm install
+            npm audit --audit-level=critical
 
   scan-backend:
     executor:
@@ -130,7 +135,12 @@ jobs:
       - restore_cache:
           keys:
             - backend-build
-      # Your job code here
+      - run:
+          name: Check vulnerability
+          command: |
+            cd backend
+            npm install
+            npm audit --audit-level=critical
 
   deploy-infrastructure:
     executor:
