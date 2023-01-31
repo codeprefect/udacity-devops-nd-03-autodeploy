@@ -25,7 +25,8 @@ Please find the details of my submission for project 3.
 
 #### Figure 3 (Found vulnerabilities)
 
-![Vulnerabilities](./docs/screenshots/SCREENSHOT03.png)
+![Frontend Vulnerabilities](./docs/screenshots/SCREENSHOT03-1.png)
+![Backend Vulnerabilities](./docs/screenshots/SCREENSHOT03-2.png)
 
 #### Figure 4 (Failed build alert)
 
