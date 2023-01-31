@@ -3,7 +3,7 @@ version: 2.1
 executors:
   node:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
   ansible:
     docker:
       - image: cytopia/ansible:latest-aws
@@ -160,6 +160,14 @@ jobs:
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
+          name: Save backend URL in kvdb
+          command: |
+            BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text)
+            curl https://kvdb.io/A47ubUVav1gPEE3oksfSYY/BACKEND_URL -d "http://$BACKEND_IP:3030"
+      - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
@@ -231,41 +239,56 @@ jobs:
 
   deploy-frontend:
     executor:
-      name: aws
+      name: ansible
     steps:
       - checkout
       - run:
           name: Install dependencies
+          working_directory: /tmp
           command: |
-            # your code here
+            apk add --update curl rsync openssh nodejs npm
       - run:
           name: Get backend url
+          working_directory: ./frontend
           command: |
-            # your code here
-            export API_URL="http://${BACKEND_IP}:3030"
+            export API_URL=$(curl https://kvdb.io/A47ubUVav1gPEE3oksfSYY/BACKEND_URL)
             echo "${API_URL}"
+            npm install
+            npm run build
       - run:
           name: Deploy frontend objects
+          working_directory: ./frontend
           command: |
-            # your code here
+            aws s3 cp ./dist "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/frontend/dist
       - destroy-environment
-      - revert-migrations   
+      - revert-migrations
                     
   deploy-backend:
     executor:
       name: ansible
     steps:
       - checkout
-      # Add ssh keys with fingerprint
-      # attach workspace
+      - add_ssh_keys:
+          fingerprints:
+            - "35:ce:e5:4b:d5:09:6c:1d:be:8d:98:17:56:6f:82:10"
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
+          working_directory: /tmp
           command: |
-            # your code here
+            apk add --update curl rsync openssh nodejs npm
       - run:
           name: Deploy backend
+          working_directory: ./.circleci/ansible
           command: |
-            # your code here
+            npm install
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml -vv
       - destroy-environment
       - revert-migrations 
 
@@ -278,6 +301,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
+            exit 1
       - run:
           name: Get backend url
           command: |
