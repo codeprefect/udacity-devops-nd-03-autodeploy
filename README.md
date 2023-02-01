@@ -4,10 +4,10 @@
 
 ### URLS
 
-- URL01 - https://github.com/codeprefect/udacity-devops-nd-03-autodeploy.git
-- URL02 - TODO: deployed application URL (S3 Bucket)
-- URL03 - TODO: deployed application URL (CloudFormation)
-- URL04 - TODO: backend application URL
+- URL01 - [Github](https://github.com/codeprefect/udacity-devops-nd-03-autodeploy.git)
+- URL02 - [AWS S3](https://udapeople-cda858a.s3-website-us-east-1.amazonaws.com)
+- URL03 - [CloudFormation](https://d3usw6g2m851mc.cloudfront.net/)
+- URL04 - [Backend URL](http://ec2-54-175-186-169.compute-1.amazonaws.com/api/status)
 
 ### Pictures
 
@@ -54,11 +54,12 @@ Please find the details of my submission for project 3.
 
 #### Figure 10 (Trigger evidence - master only)
 
-![Trigger evidence](./docs/screenshots/SCREENSHOT10.png)
+![Trigger evidence - Non master](./docs/screenshots/SCREENSHOT10-1.png)
+![Trigger evidence - master](./docs/screenshots/SCREENSHOT10-2.png)
 
 #### Figure 11 (Prometheus - EC2 CPU and Disk Usage)
 
-![Prometheus Dashboard](./docs/screenshots/SCREENSHOT11.png)
+![Prometheus Dashboard](./docs/screenshots/SCREENSHOT11.jpeg)
 
 #### Figure 12 (Prometheus / AlertManager alert for EC2)
 
@@ -77,49 +78,5 @@ Please find the details of my submission for project 3.
 #### Figure 3 (URL05 Screenshot - Prometheus Server)
 
 ![Prometheus](./docs/screenshots/URL05_SCREENSHOT.png)
-
-### How to reproduce
-
-#### Create/Update required network infrastructure
-
-```[bash]
-./network/network-script-create.sh stack-name aws-region
-# feel free to change the region to your own preferred region e.g
-# ./network/network-script-create.sh udagram-network us-east-1
-```
-
-```[bash]
-./network/network-script-update.sh stack-name aws-region, please use the same region used in create
-# feel free to change the region to your own preferred region e.g
-# ./network/network-script-update.sh udagram-network us-east-1
-```
-
-#### Create/Update application servers and other resources
-
-```[bash]
-./app-script-create.sh stack-name aws-region
-# feel free to change the region to your own preferred region e.g
-# ./app-script-create.sh udagram-clone us-east-1
-```
-
-```[bash]
-./app-script-update.sh stack-name aws-region, please use the same region used in create
-# feel free to change the region to your own preferred region e.g
-# ./app-script-update.sh udagram-clone us-east-1
-```
-
-#### Optional - Create/Update jump servers
-
-```[bash]
-./jump-server/jump-script-create.sh stack-name aws-region
-# feel free to change the region to your own preferred region e.g
-# ./jump-server/jump-script-create.sh udagram-clone us-east-1
-```
-
-```[bash]
-./jump-server/jump-script-update.sh stack-name aws-region, please use the same region used in create
-# feel free to change the region to your own preferred region e.g
-# ./jump-server/jump-script-update.sh udagram-clone us-east-1
-```
 
 Thank you.
