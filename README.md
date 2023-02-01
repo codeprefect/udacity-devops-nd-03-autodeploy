@@ -12,7 +12,7 @@
 
 - URL01 - [Github](https://github.com/codeprefect/udacity-devops-nd-03-autodeploy.git)
 - URL02 - [AWS S3](https://udapeople-cda858a.s3-website-us-east-1.amazonaws.com)
-- URL03 - [CloudFormation](https://d3usw6g2m851mc.cloudfront.net/)
+- URL03 - [CloudFormation](http://d3usw6g2m851mc.cloudfront.net/)
 - URL04 - [Backend URL](http://ec2-54-175-186-169.compute-1.amazonaws.com/api/status)
 
 ### Pictures
