@@ -19,7 +19,7 @@ export class EmployeeBirthDateUpdater extends BaseCommandHandler<UpdateEmployeeB
 
     const employee = await this.employeeRepository.findById(employeeId);
 
-    employee.birthdate = moment(birthdate)
+    employee.birthdate = moment(birthdate, false)
     .utc()
     .toDate();
 
