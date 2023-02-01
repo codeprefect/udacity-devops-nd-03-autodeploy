@@ -2,18 +2,14 @@
 
 ## Project 3: Give Your Application Auto-Deploy Superpowers
 
-<object data="./docs/udapeople.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="./docs/udapeople.pdf">
-        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="./docs/udapeople.pdf">Download PDF</a>.</p>
-    </embed>
-</object>
+Presentation can be found [here](./docs/udapeople.pdf).
 
 ### URLS
 
 - URL01 - [Github](https://github.com/codeprefect/udacity-devops-nd-03-autodeploy.git)
-- URL02 - [AWS S3](https://udapeople-cda858a.s3-website-us-east-1.amazonaws.com)
+- URL02 - [AWS S3](http://udapeople-45d0928.s3-website-us-east-1.amazonaws.com)
 - URL03 - [CloudFormation](http://d3usw6g2m851mc.cloudfront.net/)
-- URL04 - [Backend URL](http://ec2-54-175-186-169.compute-1.amazonaws.com/api/status)
+- URL04 - [Backend URL](http://ec2-54-157-167-29.compute-1.amazonaws.com:3030/api/status)
 
 ### Pictures
 
@@ -48,7 +44,7 @@ Please find the details of my submission for project 3.
 
 #### Figure 7 (Successful rollback after failed smoke test)
 
-![Rollback after failed smoke test](./docs/screenshots/SCREENSHOT07.png)
+![Rollback after failed smoke test](./docs/screenshots/SCREENSHOT07.jpeg)
 
 #### Figure 8 (Successful promotion to production)
 
